@@ -36,4 +36,15 @@ dotenv.config({
 })
 // ye app load hone se pehle hi dotenv file config hona zaruri hai, uske liye 2 syntax hai,  ya to require wala syntax ya ye, 
 // require wala index.js ki ekdum fisrt line honi chahiye jaha import statements hoti jo code consistency kharab kardegi
-connectDB();
+
+// connectDB pe async await laga h , so promise return hoga , hence .then() likhe
+connectDB()
+.then(() => {
+    // jb tk app.listen nhi karega app ka loading khatam nhi hoga, db connection, during loading wala process hai
+    app.listen(process.env.PORT || 8000, () => {
+        console.log(`Server is running on ${process.env.PORT}`);
+    })
+})
+.catch((error) => {
+    console.log("Mongo DB connection failed: ", error);
+})
