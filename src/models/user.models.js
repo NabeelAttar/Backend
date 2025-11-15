@@ -60,7 +60,7 @@ userSchema.pre("save", async function (next){
     // save type of operation hone se pehle ye run ho jaayega aur arrow function nhi h yaha kyuki uske ppass this wala context nhi hota
     if(!this.isModified("password")) return next(); //agar password already modify ho chuka hai fir bhi ye pre ki call aa rhi due to some other saving option to vo rokna hoga
 
-    this.password = bcrypt.hash(this.password, 10); //bcrypt ne password ke liye hash generate kiya 10 rounds me
+    this.password = await bcrypt.hash(this.password, 10); //bcrypt ne password ke liye hash generate kiya 10 rounds me
     next()
 })
 

@@ -1,0 +1,43 @@
+http aur https me dono me technology same use hoti bs http me data clear text format hota aur https me ek extra security layer added hoti 
+jiski wajah se data hashed format me stored hota, https me data server se client and vice versa hi readable hota , in between readable nhi hota
+hyper text transfer protocol : text ko kaise transfer kare 
+URL : uniform resource locator
+URI : uniform resource identifier
+URN : uniform resource name
+
+HTTP headers are metadata that is data related to data, file type size n all 
+its a key value whcih is sent along with request and respoonse , used for caching, authentication and state management
+request headers : from client , response headers : from server , representation headers from encoding and compression and payload headers that just stores data
+
+most common headers :
+accept : which type of data to accept : any but common types are json
+user-agent header : stores the services like postmant used or on which operating system the server was , etc
+authorization headers
+content type: image/pdf/video
+cookie headers 
+cache control headers: example, otp expire kab hoga wagere
+
+HTTP methods:
+GET : retrieve a resource, kuch data lena ho server se tb use karte
+POST: interact with the resource , (mostly add the values)
+PUT: replace a resource 
+DELETE: remove a resource 
+HEAD: no message body (returns response headers only)
+OPTIONS: agar koi endpoint banaya hai aapne, jaise user endpoint to waha kya options available hai, get kar skte kya post kar skte kya
+TRACE: debugging me use hota , (get same data i.e for loopback test)
+PATCH: change part of a resource
+
+HTTP status code :
+1xx : informational 
+2xx : success
+3xx : redirection : jo bhi aap resource dekhna chah rhe the vo shift ho gya hai kahi aur for example
+4xx : client error
+
+100: continue                                     400: bad request
+102: processing hora, thoda wait karo             401: user is not authorized, login hai authorized nhi
+200: ok, sb change si                             402: payment required
+201: created data                                 404: not found
+202: accepted data                                500: internat server error
+307: temporary redirect                           504: gateway timeout 
+308: permanent redirect 
+

@@ -19,7 +19,11 @@ const uploadOnCloudinary = async (localfilePath) => {
             resource_type: 'auto'
         })
         // file has been uploaded successfully
-        console.log("file is uploaded", response.url);
+        // console.log("file is uploaded", response.url);
+        // console.log(response);
+        
+        // successfully cloudinary pe upload karne ke baad unlink kardo synchorously mtlb background me nhi pehle unlink karo fir aage badhege
+        fs.unlinkSync(localfilePath)
         return response;
     } catch (error) {
         // yaha pe aaya tu mtlb filepath to thi pr fir bhi upload hone me error aaya , to apanko ye file delete karni padegi local server se
@@ -28,3 +32,5 @@ const uploadOnCloudinary = async (localfilePath) => {
         return null
     }
 }
+
+export {uploadOnCloudinary}

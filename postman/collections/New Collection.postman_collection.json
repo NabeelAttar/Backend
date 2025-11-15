@@ -1,0 +1,75 @@
+{
+  "info": {
+    "_postman_id": "2eb36efc-431c-42fe-8240-b138569199fb",
+    "name": "youtube",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "New Request",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "fullname",
+                  "value": "1",
+                  "type": "text",
+                  "uuid": "1147e24f-0840-4f92-87bb-979544a57620"
+                },
+                {
+                  "key": "email",
+                  "value": "1@gmail.com",
+                  "type": "text",
+                  "uuid": "9cb93779-05ee-4b14-bd04-611973377f38"
+                },
+                {
+                  "key": "password",
+                  "value": "23456",
+                  "type": "text",
+                  "uuid": "d485f081-368a-419b-99f7-22d7b987271e"
+                },
+                {
+                  "key": "username",
+                  "value": "fbjgri",
+                  "type": "text",
+                  "uuid": "dbb4f08b-90df-4122-9cd1-75f4edebadd5"
+                },
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "uuid": "7fc4bdc5-e370-451e-9d5e-fd10e7226902",
+                  "src": [
+                    "/C:/Users/Acer/OneDrive/Pictures/Screenshots/Screenshot 2025-07-12 012343.png"
+                  ]
+                },
+                {
+                  "key": "coverImage",
+                  "type": "file",
+                  "uuid": "68b1fa7a-5685-4fef-be6d-5135b9a8e079",
+                  "src": [
+                    "/C:/Users/Acer/OneDrive/Pictures/Screenshots/Screenshot 2025-07-12 012904.png"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{server}}/users/register",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "users",
+                "register"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

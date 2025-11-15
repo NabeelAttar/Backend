@@ -20,6 +20,19 @@ app.use(express.static("public"))
 // lastly - cookie parser, cookie hota hai browser me stored user ka data, usse related operations karne ye karo
 app.use(cookieParser())
 
+
+// routes import
+import userRouter from "./routes/user.routes.js"
+
+// routes declaration
+// app,get nhi app.use , use hoga kyuki app.get tab use hota jab yahi pe controller aur yahi pe router hota , ab jab cheeze segregated ho 
+// gyi hai to middleware use karna padega hence wewill use app.use
+app.use("/api/v1/users", userRouter)
+// ab yaha se control jaayeag userRouter pe 
+// so for registering user the url is : http://localhost:8000/api/v1/users/register
+// /api/v1/users is defined here and /register is defined is in the userRouter
+
+
 export { app }
 
 // jsb koi middleware ya configurations use karte to app.use lagega CORS origin ke liye aur app,get ya app,post to normally hota hi hai

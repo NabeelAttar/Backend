@@ -7,3 +7,5 @@ class apiResponse {
         // 400 se upar error ke status codes hote, aur 399 tk response ke status codes
     }
 }
+
+export {apiResponse}

@@ -1,6 +1,7 @@
 // one line to remember : database is always in another continent, so jab bhi db wale kaam karo to try catch and async await lagao
 import mongoose from "mongoose"
 import { DB_NAME } from "./constants.js";
+import { app } from "./app.js";
 
 // jaise hi app load hoga humko database connect karna h
 // iske 2 approaches h , 1: index me hi logic likhlo databse connection ka
@@ -10,6 +11,7 @@ import { DB_NAME } from "./constants.js";
 
 // import express from "express"
 // const app = express()
+
 
 // ;( async () => {
 //     try {
@@ -32,7 +34,7 @@ import connectDB from "./db/index.js";
 import dotenv from 'dotenv'
 
 dotenv.config({
-    path: './env'
+    path: './.env'
 })
 // ye app load hone se pehle hi dotenv file config hona zaruri hai, uske liye 2 syntax hai,  ya to require wala syntax ya ye, 
 // require wala index.js ki ekdum fisrt line honi chahiye jaha import statements hoti jo code consistency kharab kardegi
