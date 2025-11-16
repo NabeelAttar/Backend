@@ -9,7 +9,7 @@
       "name": "user",
       "item": [
         {
-          "name": "New Request",
+          "name": "register",
           "request": {
             "method": "POST",
             "body": {
@@ -65,6 +65,74 @@
               "path": [
                 "users",
                 "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"nabeel@google.com\",\r\n    \"password\": \"12345678\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{server}}/users/login",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "users",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": null,
+                  "type": "text",
+                  "uuid": "5421be91-42be-4ca3-949f-75ad1c2b3b73",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "logout",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{server}}/users/logout",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "users",
+                "logout"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": null,
+                  "type": "text",
+                  "uuid": "5421be91-42be-4ca3-949f-75ad1c2b3b73",
+                  "disabled": true
+                }
               ]
             }
           }

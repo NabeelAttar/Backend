@@ -2,6 +2,27 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 import {User} from '../models/user.models.js'
 import {uploadOnCloudinary} from '../utils/cloudinary.js'
 import { apiResponse } from "../utils/apiResponse.js"
+import jwt from 'jsonwebtoken'
+
+const generateAccessAndRefreshTokens = async(userId) => {
+    try {
+        const user = await User.findById(userId)
+        const accessToken = user.generateAccessTokens()
+        const refreshToken = user.generateRefreshTokens()
+
+        // refresh token ko databse me store karao for comparison later
+        user.refreshToken = refreshToken
+        // tokens generate ho gye hai user to mongoose method save se save karo, by default save method ko password validated lagta hai isliye
+        // hum explicitly bole ki bina password validation ke save kardo
+        await user.save({validateBeforeSave: false})
+
+        return {accessToken, refreshToken}
+
+    } catch (error) {
+        throw new apiError(500, "Something went wrong while generating access and refresh tokens")
+    }
+}
+
 const registerUser = asyncHandler(async (req, res) => {
     // get user details from frontend
     // details json format me ya forontend ke forms se liya jaayega , jo req.body me milta aur url se data hoga agar to alag procedure hoti
@@ -79,4 +100,145 @@ const registerUser = asyncHandler(async (req, res) => {
     )
 })
 
-export {registerUser}
+
+// access token aur refresh token dono same hi tarah se generate hote bs ek short lived hota aur dusra loong lived. so,  agar login karrhe 
+// to access token milega aur user login hai agar and authenticated hai to file uploading wagere kar skta , lekin agar login nhi karta
+// and for security reasons login window bs 15 min hi chalti fir user ko firse password wagere daalne ki zarurat nhi hum kehte ki aap bs
+// ek endpoint hit kar dijiye aur refresh token generate ho jaayega agar ye generate hua hua refresh token aur database ka token match ho gye
+// to hum aaap ko login karwa dege
+
+const loginUser = asyncHandler(async (req, res) => {
+    // req body se data lo
+    const {email, username, password} = req.body
+
+
+    // username ya email hona chahiye 
+    if(!username && !email){
+        throw new apiError(400, "username or email is required")
+    }
+
+
+    // find the user with same username or same email
+    const user = await User.findOne({
+        $or: [{username}, {email}]
+    })
+
+    // agar nhi mila to user doesnt exist
+    if(!user) throw new apiError(404, "User does not exist")
+
+
+    // agar mil gaya to password check karo sahi daala kya 
+    const isPasswordValid = await user.isPasswordCorrect(password)
+
+    if(!isPasswordValid) throw new apiError(401, "Invalid user credentials")
+    
+    // access and refresh token
+    const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id)
+
+
+    // remove password and refresh token fields 
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+
+
+    // send cookie with response
+    // cookies jo hai direct bhejega tofrontend se koi bhi modify kardega, hum chahte ki sirf sever se modify ho, hence below step
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200) 
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+        new apiResponse(
+            200, 
+            {
+                user: loggedInUser, accessToken, refreshToken
+            },
+            "User Logged In Successfully"
+        )
+    )
+})
+
+const logoutUser = asyncHandler(async (req, res) => {
+    // cookie hatana padega, refresh token database me reset karna hoga 
+    // ab middleware ki wajah se yaha req field me user available hoga
+    // hum findbyIdAndUpdate and se pehle find karege fir uska refreshToken humare database se uda dege aur new value jaise bhejna hai usko true kardege
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                refreshToken: undefined
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new apiResponse(200, {}, "User logged Out"))
+
+})
+
+// vo endpoint banate jisko agar user hit karega (frontend developer hit karwayega) to refresh token generate hoga aur user login ho jaayega
+// uske liye pehle controller banayege ofc
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    // cookie se refresh token lega
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+    if(!incomingRefreshToken) throw new apiError(401, "unauthorized request")
+
+    try {
+        // refresh token ko decode karega usme se id nikaalne ke liye jiske basis me user dhund skta 
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+
+        const user = await User.findById(decodedToken?._id)
+        if(!user) throw new apiError(401, "Invalid Refresh Token")
+        
+        // ye token aur database me jo user ke liye token store hua tha vo agar same nhi h to throw error
+        if(incomingRefreshToken !== user.refreshToken){
+            throw new apiError(401, "Refresh token is expired or used")
+        }
+        
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+
+        // agar dono token match kar jaate to user ko login karwa dege bina password daale , mtlb naya session generate hoga mtlb firse 
+        // access and refresh tokens generate hoge
+        const {accessToken, newRefreshToken} = await generateAccessAndRefreshTokens(user._id)
+
+        // return these naye tokens in the response
+        return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
+        .json(
+            new apiResponse(
+                200,
+                {accessToken, refreshToken: newRefreshToken},
+                "Access Token refreshed"
+            )
+        )
+    } catch (error) {
+        throw new apiError(401, error?.message || "Invalid Refresh Token")
+    }
+})
+
+export {
+    registerUser,
+    loginUser,
+    logoutUser,
+    refreshAccessToken
+}
