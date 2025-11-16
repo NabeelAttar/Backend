@@ -4,6 +4,7 @@ import {uploadOnCloudinary} from '../utils/cloudinary.js'
 import { apiResponse } from "../utils/apiResponse.js"
 import jwt from 'jsonwebtoken'
 import { apiError } from "../utils/apiError.js"
+import mongoose from "mongoose"
 
 const generateAccessAndRefreshTokens = async(userId) => {
     try {
@@ -428,6 +429,67 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     )
 })
 
+const getWatchHistory = asyncHandler(async (req, res) => {
+    // req.user._id me mongoDB ki id nhi milti , bs ek string milti, id actually me aisi hoti agar tu mongodb pe dekhega to 
+    // id : objectId(string_value) , so jb tu User. koi mongodb ki query karta hai id ke zariye to ye id hi bhejta hai , internally mongoose dekhleta ki iske piche objectid lagana hai n all
+    const user = await User.aggregate([
+        {
+            $match: {
+                // _id: req.user._id //ye ho jaayega glt kyuki aggregation ka code directly use hota yaha mongoose kuch handle nhi karta , so hume hi proper id bhejni padegi
+                _id: new mongoose.Types.ObjectId(req.user._id) 
+            }
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                // yaha ek nested lookup lagana padega kyuki videos model ke andar ek owner naam ki field hai jo user hai , agar nhi lagayega 
+                // yaha lookup to owner ka kuch nhi milega 
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullname: 1,
+                                        username: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                            // huumko owner yaani user ke yehi values prject karwane hai 
+                        }
+                    },
+                    {
+                        $addFields: {
+                            $owner: {
+                                $first: "$owner"
+                            }
+                        }
+                        // owner field ko hi overwrite kiya, bs owner array me se first output diya
+                    }
+                ]
+            }
+        }
+    ])
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            user[0].watchHistory,
+            "Watch History fetched successfully"
+        )
+    )
+})
+
 export {
     registerUser,
     loginUser,
@@ -438,5 +500,6 @@ export {
     updateAccountDetails,
     updateUserAvatar,
     updateCoverImage,
-    getUserChannelProfile
+    getUserChannelProfile,
+    getWatchHistory
 }
